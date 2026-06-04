@@ -1,11 +1,22 @@
+# Python virtual environment
 .venv/
+
+# Python cache
 __pycache__/
 *.pyc
 
+# Downloaded model weights
+*.pt
+
+# TensorRT files (future)
+*.engine
+
+# ONNX exports (future)
+*.onnx
+
+# Experiment data
 data/images/*
 data/videos/*
-results/*
 
-*.pt
-*.onnx
-*.engine
+# Generated results
+results/*
