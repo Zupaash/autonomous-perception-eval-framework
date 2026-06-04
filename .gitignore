@@ -1,22 +1,27 @@
 # Python virtual environment
 .venv/
 
-# Python cache
+# Python cache files
 __pycache__/
 *.pyc
 
-# Downloaded model weights
+# YOLO model weights
 *.pt
 
-# TensorRT files (future)
+# Future model formats
+*.onnx
 *.engine
 
-# ONNX exports (future)
-*.onnx
+# Downloaded test assets
+bus.jpg
 
-# Experiment data
+# Dataset folders
 data/images/*
 data/videos/*
 
-# Generated results
+# Generated experiment outputs
 results/*
+
+# Operating system junk
+.DS_Store
+Thumbs.db
