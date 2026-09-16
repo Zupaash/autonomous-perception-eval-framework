@@ -1,4 +1,4 @@
-from logging.experiment_logger import ExperimentLogger
+from experiment_logging.experiment_logger import ExperimentLogger
 
 from inference.yolo_detector import YOLODetector
 from benchmarking.benchmark_runner import BenchmarkRunner
