@@ -1,4 +1,3 @@
-# src/logger.py
 import os
 
 def output_telemetry(results: dict, model_name: str):

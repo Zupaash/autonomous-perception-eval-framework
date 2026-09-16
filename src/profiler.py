@@ -1,4 +1,3 @@
-# src/profiler.py
 import time
 import psutil
 import numpy as np
