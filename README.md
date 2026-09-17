@@ -1,165 +1,68 @@
-# Study Structure
+# Autonomous Perception Evaluation Framework
 
-## Motivation
-
-Autonomous systems operate under strict temporal constraints. While modern computer vision models have achieved remarkable detection performance, their suitability for real-time autonomous deployment depends not only on accuracy but also on latency, reliability, and computational cost.
-
-This project investigates the tradeoffs between perception capability and temporal performance in autonomous environments. The goal is to develop a framework for evaluating perception systems under realistic deployment constraints and to identify factors that influence their practical viability for robotics applications.
+A research-focused validation framework designed to evaluate the trade-offs between perception capability and temporal performance in autonomous systems. Rather than focusing solely on static detection accuracy, this framework emphasizes **inference behavior**, **latency reliability (P₉₅/P₉₉ bounds)**, and **hardware resource utilization** under deployment-constrained environments.
 
 ---
 
-## Research Focus
+## 🎯 Study Structure & Research Focus
 
-The central objective of this project is to understand how temporal constraints affect the deployment of perception systems in autonomous environments.
+Autonomous systems operate under strict temporal and physical constraints. While modern object detection networks achieve remarkable accuracy, their real-world suitability depends heavily on deterministic execution bounds and computational efficiency. 
 
-Rather than evaluating models solely on detection accuracy, this framework emphasizes inference behavior, latency reliability, resource utilization, and deployment feasibility.
+### Primary Research Question
+* How do temporal constraints influence the deployment feasibility of perception systems in autonomous robotic environments?
 
----
-
-## Primary Research Question
-
-How do temporal constraints influence the deployment feasibility of perception systems in autonomous robotic environments?
-
----
-
-## Secondary Research Questions
-
-1. How do latency distributions vary across object detection architectures?
-
-2. To what extent do latency spikes impact the reliability of perception pipelines?
-
-3. How do hardware constraints influence model selection for autonomous systems?
-
-4. What tradeoffs emerge between perception quality and computational cost?
-
-5. How do optimization techniques affect temporal reliability and resource utilization?
+### Secondary Research Questions
+* How do latency distributions vary across object detection architectures?
+* To what extent do latency spikes (P₉₅ and P₉₉ bounds) impact the safety and reliability of perception pipelines?
+* What computational trade-offs emerge between perception quality (model scale) and hardware utilization?
 
 ---
 
-## Methodology
+## 📂 Minimalist Architecture
 
-The study will be conducted through a series of controlled benchmarking experiments.
+The project is structured to eliminate software engineering bloat, isolating validation mechanics into three highly focused, decoupled modules within a single entry-point execution system:
 
-Each experiment will evaluate perception systems using metrics such as:
-
-* Average Inference Latency
-* Median Latency
-* P95 Latency
-* P99 Latency
-* Throughput (FPS)
-* CPU Utilization
-* Memory Consumption
-* Resource Efficiency
-
-Experimental results will be collected and analyzed across multiple deployment configurations.
+```text
+perception_eval/
+├── docs/                  # Study background and documentation
+├── experiments/           # Generated evaluation output and markdown logs
+├── src/
+│   ├── detector.py        # SafetyCriticalDetector wrapper for the network
+│   ├── profiler.py        # PerformanceProfiler high-precision evaluation loops
+│   └── logger.py          # Output formatting and telemetry file logger
+└── run_eval.py            # Master automated multi-model batch runner
+```
 
 ---
 
-## Experimental Roadmap
+## 🛠️ Getting Started & Replication
 
-### Phase 1: Perception Fundamentals
+### 1. Installation
+Clone the repository and install the framework's lightweight tracking and perception dependencies:
+```bash
+pip install ultralytics psutil numpy
+```
 
-Objective:
-Develop an understanding of modern object detection pipelines and establish baseline inference capabilities.
-
-Deliverables:
-
-* YOLO inference pipeline
-* Initial perception experiments
-* Baseline performance measurements
-
----
-
-### Phase 2: Benchmarking Infrastructure
-
-Objective:
-Develop a reproducible benchmarking framework capable of collecting latency and resource utilization metrics.
-
-Deliverables:
-
-* Benchmark harness
-* Metrics collection system
-* Experiment logging framework
+### 2. Executing the Evaluation Sweep
+Run the master script to trigger the automated hardware cache warm-up, microsecond-resolution timing loops, and CPU telemetry collection across multiple model horizons:
+```bash
+python run_eval.py
+```
 
 ---
 
-### Phase 3: Temporal Reliability Analysis
+## 📊 Baseline Telemetry Results (CPU Benchmark)
 
-Objective:
-Investigate latency variability and identify conditions that produce unreliable perception behavior.
+The following baseline metrics were collected across sequential 100-frame loops on an x86 host environment, using mock array video feeds to isolate processing latency from local disk I/O bottlenecks:
 
-Deliverables:
+| Model Architecture | Mean Latency | Median Latency | $P_{95}$ Reliability Bound | $P_{99}$ Extreme Spike | System Throughput | Avg CPU Load |
+| :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+| **YOLOv8n** (Nano) | 83.76 ms | 82.36 ms | 138.81 ms | 186.57 ms | **11.9 FPS** | 94.9% |
+| **YOLOv8s** (Small) | 191.50 ms | 183.39 ms | 216.68 ms | 242.27 ms | **5.2 FPS** | 89.5% |
+| **YOLOv8m** (Medium) | 575.39 ms | 562.76 ms | 660.75 ms | 846.71 ms | **1.7 FPS** | 96.1% |
 
-* Latency distribution analysis
-* P95/P99 benchmarking
-* Reliability reports
+### Key Trade-Off Insights
+1. **The Real-Time Boundary:** Standard robotic deployments typically demand a processing threshold of sub-33 ms ($\ge 30$ FPS). This unaccelerated CPU validation highlights a critical barrier—even the lightest configuration (YOLOv8n) is restricted to 11.9 FPS under full physical host strain ($94.9\%$).
+2. **The Risk of Latency Jitter:** While YOLOv8n averages 83.76 ms, its **$P_{99}$ latency climbs to 186.57 ms**. For an autonomous drone or vehicle traveling at high speed, this 1% edge-case spike translates to a significant window of localized blindness, proving why tracking average latency alone is insufficient for safety-critical systems.
+3. **Non-Linear Complexity Scaling:** Scaling from Nano to Medium induces an exponential latency bottleneck, dragging throughput down to an unusable 1.7 FPS. This emphasizes that model depth/width scaling requires hardware acceleration (GPU/TPU) or advanced edge compiler optimizations (Quantization/TensorRT) to achieve physical viability.
 
----
-
-### Phase 4: Comparative Model Evaluation
-
-Objective:
-Evaluate multiple perception architectures under identical testing conditions.
-
-Candidate Models:
-
-* YOLOv8
-* RT-DETR
-* MobileSAM
-* Future architectures
-
-Deliverables:
-
-* Comparative benchmarking results
-* Tradeoff analysis
-
----
-
-### Phase 5: Inference Optimization
-
-Objective:
-Investigate the impact of deployment optimizations on performance and resource utilization.
-
-Topics:
-
-* Quantization
-* GPU Acceleration
-* TensorRT
-* Edge Deployment
-
-Deliverables:
-
-* Optimization study
-* Performance improvement analysis
-
----
-
-### Phase 6: Robotics Integration
-
-Objective:
-Integrate perception pipelines into ROS2-based robotic systems.
-
-Deliverables:
-
-* ROS2 perception node
-* Real-time data pipeline
-* Robotics benchmarking
-
----
-
-### Phase 7: Autonomous Drone Deployment
-
-Objective:
-Deploy and evaluate perception systems within an autonomous drone platform.
-
-Deliverables:
-
-* Drone perception stack
-* End-to-end evaluation
-* Real-world deployment study
-
----
-
-## Long-Term Vision
-
-Develop a research-oriented framework for evaluating perception systems under autonomous deployment constraints and provide evidence-based guidance for selecting perception pipelines in robotics applications.
